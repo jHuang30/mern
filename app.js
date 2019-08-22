@@ -16,9 +16,6 @@ mongoose
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.get("/", (req, res) => {
-  res.send("Hello World again");
-});
 
 app.use(passport.initialize());
 require("./config/passport")(passport);
