@@ -54,10 +54,19 @@ router.post("/login", (req, res) => {
           }
         );
       } else {
-        return res.status(400).json({ password: "Incorrect password" });
+        errors.password = "Incorrect password";
+        return res.status(400).json(errors);
       }
     });
   });
 });
+
+router.get(
+  "/current",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    res.json({ msg: "Success" });
+  }
+);
 
 module.exports = router;
