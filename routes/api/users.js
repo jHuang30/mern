@@ -5,13 +5,34 @@ const User = require("../../models/User");
 const jwt = require("jsonwebtoken");
 const keys = require("../../config/keys");
 const passport = require("passport");
+const validLoginInput = require("../../validation/login");
+const validRegisterInput = require("../../validation/register");
 
 router.get("/test", (req, res) => res.json({ msg: "this is user test" }));
 
+router.get(
+  "/current",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    res.json({
+      id: req.user.id,
+      handle: req.user.handle,
+      email: req.user.email
+    });
+  }
+);
+
 router.post("/register", (req, res) => {
+  const { errors, isValid } = validRegisterInput(req.body);
+
+  if (!isValid) {
+    return res.status(400).json(errors);
+  }
+
   User.findOne({ email: req.body.email }).then(user => {
     if (user) {
-      return res.status(400).json({ json: "A email already exist." });
+      errors.email = "Email already exists";
+      return res.status(400).json(errors);
     } else {
       const newUser = new User({
         handle: req.body.handle,
@@ -34,12 +55,16 @@ router.post("/register", (req, res) => {
 });
 
 router.post("/login", (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
+  const { errors, isValid } = validLoginInput(req.body);
+
+  if (!isValid) {
+    return res.status(400).json(errors);
+  }
 
   User.findOne({ email }).then(user => {
     if (!user) {
-      return res.status(404).json({ email: "Email not found" });
+      errors.email = "User not found";
+      return res.status(404).json(errors);
     }
     bcrypt.compare(password, user.password).then(isMatch => {
       if (isMatch) {
@@ -51,7 +76,7 @@ router.post("/login", (req, res) => {
           (err, token) => {
             res.json({
               success: true,
-              token: "Bearer" + token
+              token: "Bearer " + token
             });
           }
         );
@@ -62,15 +87,5 @@ router.post("/login", (req, res) => {
     });
   });
 });
-
-router.get(
-  "/current",
-  passport.authenticate("jwt", { session: false }),
-  (req, res) => {
-    console.log(req);
-    
-    res.json({ msg: "Success" });
-  }
-);
 
 module.exports = router;
