@@ -39,10 +39,10 @@ router.post(
     if (!isValid) {
       return res.status(400).json(errors);
     }
-    const newTweet = {
+    const newTweet = new Tweet({
       text: req.body.text,
       user: req.user.id
-    };
+    });
 
     newTweet.save().then(tweet => res.json(tweet));
   }

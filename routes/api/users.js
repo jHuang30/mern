@@ -8,7 +8,7 @@ const passport = require("passport");
 const validLoginInput = require("../../validation/login");
 const validRegisterInput = require("../../validation/register");
 
-router.get("/test", (req, res) => res.json({ msg: "this is user test" }));
+// router.get("/test", (req, res) => res.json({ msg: "this is user test" }));
 
 router.get(
   "/current",
@@ -60,6 +60,9 @@ router.post("/login", (req, res) => {
   if (!isValid) {
     return res.status(400).json(errors);
   }
+
+  const email = req.body.email;
+  const password = req.body.password;
 
   User.findOne({ email }).then(user => {
     if (!user) {
